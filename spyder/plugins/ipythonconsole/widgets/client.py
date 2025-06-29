@@ -369,6 +369,11 @@ class ClientWidget(QWidget, SaveHistoryMixin, SpyderWidgetMixin):  # noqa: PLR09
         kernel_handler.sig_stderr.connect(self.print_stderr)
         kernel_handler.sig_stdout.connect(self.print_stdout)
         kernel_handler.sig_fault.connect(self.print_fault)
+
+        # This needs to be done only once (when the console is created) and not
+        # on every kernel restart. That's why we connect directly to
+        # kernel_handler.sig_kernel_is_ready.
+        # See spyder-ide/spyder#24577
         kernel_handler.sig_kernel_is_ready.connect(
             self._when_kernel_is_ready)
 
@@ -782,6 +787,7 @@ class ClientWidget(QWidget, SaveHistoryMixin, SpyderWidgetMixin):  # noqa: PLR09
     @Slot(object)
     def show_env(self, env):
         """Show environment variables."""
+        env = dict(sorted(env.items()))
         self.dialog_manager.show(RemoteEnvDialog(env, parent=self))
 
     def show_time(self, end=False):
