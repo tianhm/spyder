@@ -241,11 +241,11 @@ class SpyderRemoteFileIOAPI(SpyderBaseJupyterAPI, RawIOBase):
     def closefd(self):
         return True
 
-    async def __iter__(self):
+    async def __aiter__(self):
         while response := await self.readline():
             yield response
 
-    async def __next__(self):
+    async def __anext__(self):
         response = await self.readline()
         if not response:
             raise StopIteration
@@ -426,10 +426,11 @@ class SpyderRemoteFileServicesAPI(SpyderBaseJupyterAPI):
         ) as response:
             return await response.json()
 
-    async def rmdir(self, path: Path):
+    async def rmdir(self, path: Path, non_empty: bool = False):
         async with self.session.delete(
             self.api_url / "rmdir",
-            params={"path": f"file://{path}"},
+            params={"path": f"file://{path}",
+                    "non_empty": str(non_empty).lower()},
         ) as response:
             return await response.json()
 
@@ -486,3 +487,16 @@ class SpyderRemoteFileServicesAPI(SpyderBaseJupyterAPI):
         )
         await file.connect()
         return file
+
+    async def zip_directory(
+        self, path: Path, *, compression_level: int = 5
+    ):
+        async with self.session.post(
+            self.api_url / "zip",
+            params={
+                "path": f"file://{path}",
+                "compression": compression_level,
+            },
+        ) as response:
+            while data := await response.content.read(65536):
+                yield data

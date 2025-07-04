@@ -128,6 +128,11 @@ PYTHON_CONFIG = {
                 },
                 'flake8': {
                     'enabled': False,
+                    'exclude': [],
+                    'extendSelect': [],
+                    'extendIgnore': [],
+                    'indentSize': 4,
+                    'max_line_length': 79
                 },
                 'pyls_spyder': {
                     'enable_block_comments': True,
@@ -141,6 +146,9 @@ PYTHON_CONFIG = {
                     # Disable it until we have a graphical option for users to
                     # enable it.
                     'enabled': False,
+                },
+                'no_linting': {
+                    'enabled' : False
                 }
             },
 
